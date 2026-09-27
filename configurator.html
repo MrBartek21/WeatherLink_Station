@@ -1,0 +1,3729 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather Station Configurator</title>
+
+<style>
+:root {
+    --bg: #080b10;
+    --bg2: #0d1118;
+    --panel: #11161f;
+    --panel2: #151b25;
+    --border: #242d3a;
+    --border2: #303b4b;
+
+    --text: #e8edf4;
+    --muted: #7f8b9c;
+    --muted2: #596575;
+
+    --accent: #4da3ff;
+    --accent2: #2679d9;
+
+    --green: #35d07f;
+    --yellow: #f0bd4f;
+    --red: #ff5d6c;
+    --cyan: #35c7d9;
+    --purple: #9b7cff;
+
+    --radius: 12px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+body {
+    background:
+        radial-gradient(circle at 15% 0%, rgba(77,163,255,.08), transparent 30%),
+        radial-gradient(circle at 90% 10%, rgba(53,208,127,.04), transparent 25%),
+        var(--bg);
+
+    color: var(--text);
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    overflow-x: hidden;
+}
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    min-height: 76px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding: 12px 22px;
+
+    background: rgba(8, 11, 16, .94);
+    border-bottom: 1px solid var(--border);
+
+    backdrop-filter: blur(14px);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    min-width: 240px;
+}
+
+.brand-icon {
+    width: 42px;
+    height: 42px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 11px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(77,163,255,.25),
+            rgba(77,163,255,.06)
+        );
+
+    border: 1px solid rgba(77,163,255,.25);
+
+    color: var(--accent);
+    font-size: 20px;
+}
+
+.brand-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: .2px;
+}
+
+.brand-subtitle {
+    margin-top: 2px;
+
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.topbar-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    flex: 1;
+    justify-content: center;
+}
+
+.connection {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 8px 12px;
+
+    border-radius: 999px;
+
+    background: rgba(255,255,255,.035);
+    border: 1px solid var(--border);
+
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: var(--red);
+    box-shadow: 0 0 10px rgba(255,93,108,.35);
+}
+
+.connection.connected {
+    color: var(--green);
+    border-color: rgba(53,208,127,.25);
+    background: rgba(53,208,127,.05);
+}
+
+.connection.connected .status-dot {
+    background: var(--green);
+    box-shadow: 0 0 12px rgba(53,208,127,.55);
+}
+
+.connection.warning {
+    color: var(--yellow);
+    border-color: rgba(240,189,79,.25);
+}
+
+.connection.warning .status-dot {
+    background: var(--yellow);
+}
+
+.bitrate-pill {
+    padding: 8px 11px;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    background: rgba(255,255,255,.025);
+
+    color: var(--muted);
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+}
+
+.top-actions {
+    display: flex;
+    gap: 7px;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+button {
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+}
+
+.btn {
+    min-height: 36px;
+
+    padding: 0 13px;
+
+    border-radius: 8px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    transition:
+        background .15s,
+        border-color .15s,
+        opacity .15s,
+        transform .15s;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.btn:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #06111d;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #67b2ff;
+}
+
+.btn-secondary {
+    background: #1a212c;
+    border: 1px solid var(--border2);
+    color: var(--text);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #202936;
+}
+
+.btn-danger {
+    background: rgba(255,93,108,.09);
+    border: 1px solid rgba(255,93,108,.25);
+    color: var(--red);
+}
+
+.btn-success {
+    background: rgba(53,208,127,.10);
+    border: 1px solid rgba(53,208,127,.25);
+    color: var(--green);
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.page {
+    width: 100%;
+    max-width: 1800px;
+
+    margin: 0 auto;
+    padding: 18px 22px 24px;
+}
+
+/* =========================================================
+   DEVICE OVERVIEW
+   ========================================================= */
+
+.device-overview {
+    display: grid;
+
+    grid-template-columns:
+        minmax(230px, 1.1fr)
+        minmax(150px, .7fr)
+        minmax(150px, .7fr)
+        minmax(150px, .7fr)
+        minmax(280px, 1.5fr);
+
+    gap: 10px;
+
+    margin-bottom: 15px;
+}
+
+.info-card {
+    min-height: 90px;
+
+    padding: 14px;
+
+    background: linear-gradient(
+        145deg,
+        rgba(21,27,37,.96),
+        rgba(15,20,28,.96)
+    );
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.info-label {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+}
+
+.info-value {
+    margin-top: 7px;
+
+    font-size: 17px;
+    font-weight: 700;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.info-small {
+    margin-top: 4px;
+
+    color: var(--muted2);
+    font-size: 10px;
+}
+
+.info-value.mono {
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+/* =========================================================
+   POWER
+   ========================================================= */
+
+.power-overview {
+    min-height: 90px;
+
+    padding: 12px 14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(77,163,255,.07),
+            rgba(17,22,31,.98)
+        );
+
+    border: 1px solid rgba(77,163,255,.18);
+    border-radius: var(--radius);
+}
+
+.power-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 8px;
+}
+
+.power-title {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+}
+
+.total-power {
+    color: var(--accent);
+    font-family: ui-monospace, monospace;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.power-channels {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.power-channel {
+    min-width: 0;
+    padding: 6px 7px;
+
+    background: rgba(0,0,0,.18);
+    border: 1px solid rgba(255,255,255,.05);
+    border-radius: 7px;
+}
+
+.power-channel-name {
+    color: var(--muted2);
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.power-channel-value {
+    margin-top: 2px;
+
+    color: var(--text);
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   WORKSPACE
+   ========================================================= */
+
+.workspace {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.5fr)
+        minmax(360px, .8fr);
+
+    gap: 15px;
+
+    align-items: start;
+}
+
+.left-column {
+    min-width: 0;
+}
+
+.right-column {
+    min-width: 0;
+}
+
+/* =========================================================
+   SECTION CARDS
+   ========================================================= */
+
+.card {
+    margin-bottom: 12px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(17,22,31,.98),
+            rgba(13,17,24,.98)
+        );
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    overflow: hidden;
+}
+
+.card-header {
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 10px 14px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.section-icon {
+    width: 28px;
+    height: 28px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 7px;
+
+    background: rgba(77,163,255,.08);
+    color: var(--accent);
+
+    font-size: 13px;
+}
+
+.section-description {
+    color: var(--muted2);
+    font-size: 10px;
+}
+
+.card-body {
+    padding: 13px;
+}
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.form-grid.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field {
+    min-width: 0;
+}
+
+.field.full {
+    grid-column: 1 / -1;
+}
+
+.field label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #aab5c4;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.field-help {
+    margin-top: 4px;
+
+    color: var(--muted2);
+    font-size: 9px;
+}
+
+input,
+select {
+    width: 100%;
+    height: 36px;
+
+    padding: 0 10px;
+
+    border-radius: 7px;
+    border: 1px solid var(--border2);
+
+    outline: none;
+
+    background: #0c1118;
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 12px;
+
+    transition:
+        border-color .15s,
+        box-shadow .15s;
+}
+
+input:focus,
+select:focus {
+    border-color: rgba(77,163,255,.65);
+    box-shadow: 0 0 0 3px rgba(77,163,255,.08);
+}
+
+.input-unit {
+    position: relative;
+}
+
+.input-unit input {
+    padding-right: 48px;
+}
+
+.input-unit span {
+    position: absolute;
+
+    right: 10px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--muted2);
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+}
+
+/* =========================================================
+   SENSORS
+   ========================================================= */
+
+.sensor-grid {
+    display: grid;
+
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+
+    gap: 8px;
+}
+
+.sensor {
+    position: relative;
+
+    min-width: 0;
+}
+
+.sensor input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sensor label {
+    min-height: 72px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+
+    padding: 10px;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    background: rgba(255,255,255,.018);
+
+    cursor: pointer;
+
+    transition:
+        border-color .15s,
+        background .15s,
+        transform .15s;
+}
+
+.sensor label:hover {
+    transform: translateY(-1px);
+    border-color: var(--border2);
+}
+
+.sensor input:checked + label {
+    border-color: rgba(53,208,127,.4);
+    background: rgba(53,208,127,.07);
+}
+
+.sensor-name {
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.sensor-type {
+    color: var(--muted2);
+    font-size: 9px;
+}
+
+.sensor-state {
+    color: var(--muted2);
+    font-size: 9px;
+}
+
+.sensor input:checked + label .sensor-state {
+    color: var(--green);
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* =========================================================
+   SERIAL MONITOR
+   ========================================================= */
+
+.serial-card {
+    position: sticky;
+    top: 91px;
+
+    height: calc(100vh - 110px);
+
+    min-height: 550px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.serial-header {
+    flex-shrink: 0;
+}
+
+.serial-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.serial-stat {
+    color: var(--muted);
+
+    font-family: ui-monospace, monospace;
+    font-size: 9px;
+}
+
+.serial-stat strong {
+    color: var(--text);
+}
+
+.log {
+    flex: 1;
+
+    min-height: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding: 8px;
+
+    background: #080b10;
+
+    font-family:
+        "Cascadia Code",
+        "Consolas",
+        "SFMono-Regular",
+        monospace;
+
+    font-size: 10px;
+
+    scrollbar-width: thin;
+    scrollbar-color: #303a48 transparent;
+}
+
+.log-line {
+    display: grid;
+
+    grid-template-columns: 62px 35px minmax(0, 1fr);
+
+    gap: 7px;
+
+    padding: 4px 5px;
+
+    border-radius: 5px;
+
+    line-height: 1.45;
+}
+
+.log-line:hover {
+    background: rgba(255,255,255,.025);
+}
+
+.log-time {
+    color: #455161;
+}
+
+.log-type {
+    font-weight: 700;
+}
+
+.log-message {
+    min-width: 0;
+
+    color: #aab5c4;
+
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.log-line.tx .log-type {
+    color: var(--accent);
+}
+
+.log-line.tx .log-message {
+    color: #94c8ff;
+}
+
+.log-line.rx .log-type {
+    color: var(--green);
+}
+
+.log-line.rx .log-message {
+    color: #a8e5c4;
+}
+
+.log-line.error .log-type {
+    color: var(--red);
+}
+
+.log-line.error .log-message {
+    color: #ff9ba5;
+}
+
+.log-line.warning .log-type {
+    color: var(--yellow);
+}
+
+.log-line.warning .log-message {
+    color: #e8ca83;
+}
+
+.log-line.info .log-type {
+    color: var(--muted2);
+}
+
+.serial-footer {
+    flex-shrink: 0;
+
+    min-height: 43px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 7px 9px;
+
+    border-top: 1px solid var(--border);
+
+    background: var(--panel);
+}
+
+.serial-counters {
+    display: flex;
+    gap: 12px;
+
+    font-family: ui-monospace, monospace;
+    font-size: 9px;
+}
+
+.counter {
+    display: flex;
+    gap: 5px;
+}
+
+.counter-label {
+    color: var(--muted2);
+}
+
+.counter-value {
+    color: var(--text);
+}
+
+/* =========================================================
+   POWER DETAILS
+   ========================================================= */
+
+.power-detail-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 8px;
+}
+
+.power-detail {
+    padding: 10px;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    background: rgba(255,255,255,.015);
+}
+
+.power-detail-title {
+    margin-bottom: 8px;
+
+    color: #b9c3d0;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.measurement {
+    display: flex;
+    justify-content: space-between;
+
+    margin-top: 5px;
+
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+}
+
+.measurement span:first-child {
+    color: var(--muted2);
+}
+
+.measurement span:last-child {
+    color: var(--text);
+    font-weight: 700;
+}
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 22px;
+
+    padding: 0 8px;
+
+    border-radius: 999px;
+
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.badge-neutral {
+    background: rgba(255,255,255,.05);
+    color: var(--muted);
+}
+
+.badge-green {
+    background: rgba(53,208,127,.09);
+    color: var(--green);
+}
+
+.badge-blue {
+    background: rgba(77,163,255,.09);
+    color: var(--accent);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1250px) {
+
+    .device-overview {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .power-overview {
+        grid-column: span 3;
+    }
+
+    .sensor-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1000px) {
+
+    .topbar {
+        flex-wrap: wrap;
+    }
+
+    .topbar-center {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .serial-card {
+        position: relative;
+        top: auto;
+        height: 500px;
+    }
+}
+
+@media (max-width: 700px) {
+
+    .page {
+        padding: 12px;
+    }
+
+    .topbar {
+        padding: 10px 12px;
+    }
+
+    .brand {
+        min-width: 0;
+    }
+
+    .top-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .device-overview {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .power-overview {
+        grid-column: span 2;
+    }
+
+    .power-channels {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid,
+    .form-grid.two {
+        grid-template-columns: 1fr;
+    }
+
+    .sensor-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .power-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     TOP BAR
+========================================================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            ☁
+        </div>
+
+        <div>
+            <div class="brand-title">
+                Weather Station
+            </div>
+
+            <div class="brand-subtitle">
+                Konfigurator • Arduino Nano
+            </div>
+        </div>
+
+    </div>
+
+    <div class="topbar-center">
+
+        <div id="connection" class="connection">
+
+            <span class="status-dot"></span>
+
+            <span id="statusText">
+                NIEPOŁĄCZONO
+            </span>
+
+        </div>
+
+        <div class="bitrate-pill">
+            SERIAL:
+            <strong id="baudDisplay">—</strong>
+        </div>
+
+    </div>
+
+    <div class="top-actions">
+
+        <button
+            id="readButton"
+            class="btn btn-secondary"
+            disabled
+        >
+            ↻ ODCZYTAJ
+        </button>
+
+        <button
+            id="connectButton"
+            class="btn btn-primary"
+        >
+            USB
+        </button>
+
+        <button
+            id="disconnectButton"
+            class="btn btn-danger"
+            disabled
+        >
+            ROZŁĄCZ
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="page">
+
+    <!-- =====================================================
+         DEVICE INFORMATION
+    ====================================================== -->
+
+    <section class="device-overview">
+
+        <div class="info-card">
+
+            <div class="info-label">
+                Urządzenie
+            </div>
+
+            <div
+                id="deviceNodeId"
+                class="info-value mono"
+            >
+                —
+            </div>
+
+            <div class="info-small">
+                Node ID
+            </div>
+
+        </div>
+
+
+        <div class="info-card">
+
+            <div class="info-label">
+                NRF24
+            </div>
+
+            <div
+                id="deviceNrf"
+                class="info-value"
+            >
+                —
+            </div>
+
+            <div
+                id="deviceNrfDetails"
+                class="info-small"
+            >
+                kanał / moc / bitrate
+            </div>
+
+        </div>
+
+
+        <div class="info-card">
+
+            <div class="info-label">
+                Interwał
+            </div>
+
+            <div
+                id="deviceInterval"
+                class="info-value mono"
+            >
+                —
+            </div>
+
+            <div class="info-small">
+                wysyłanie danych
+            </div>
+
+        </div>
+
+
+        <div class="info-card">
+
+            <div class="info-label">
+                Czujniki
+            </div>
+
+            <div
+                id="deviceSensors"
+                class="info-value"
+            >
+                0 / 5
+            </div>
+
+            <div class="info-small">
+                aktywne
+            </div>
+
+        </div>
+
+
+        <div class="power-overview">
+
+            <div class="power-header">
+
+                <div class="power-title">
+                    Obliczony pobór mocy
+                </div>
+
+                <div
+                    id="totalPower"
+                    class="total-power"
+                >
+                    — W
+                </div>
+
+            </div>
+
+
+            <div class="power-channels">
+
+                <div class="power-channel">
+
+                    <div class="power-channel-name">
+                        CH1 • BAT
+                    </div>
+
+                    <div
+                        id="powerSummary1"
+                        class="power-channel-value"
+                    >
+                        — V • — A • — W
+                    </div>
+
+                </div>
+
+
+                <div class="power-channel">
+
+                    <div class="power-channel-name">
+                        CH2 • MAIN 5V
+                    </div>
+
+                    <div
+                        id="powerSummary2"
+                        class="power-channel-value"
+                    >
+                        — V • — A • — W
+                    </div>
+
+                </div>
+
+
+                <div class="power-channel">
+
+                    <div class="power-channel-name">
+                        CH3 • SENS 5V
+                    </div>
+
+                    <div
+                        id="powerSummary3"
+                        class="power-channel-value"
+                    >
+                        — V • — A • — W
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         POWER DETAILS
+    ====================================================== -->
+
+    <section class="card">
+
+        <div class="card-header">
+
+            <div class="section-title">
+
+                <div class="section-icon">
+                    ⚡
+                </div>
+
+                <div>
+                    Zasilanie
+                </div>
+
+            </div>
+
+            <span class="badge badge-blue">
+                INA3221
+            </span>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="power-detail-grid">
+
+                <div class="power-detail">
+
+                    <div class="power-detail-title">
+                        CH1 • BATERIA
+                    </div>
+
+                    <div class="measurement">
+                        <span>Napięcie</span>
+                        <span id="ch1Voltage">— V</span>
+                    </div>
+
+                    <div class="measurement">
+                        <span>Prąd</span>
+                        <span id="ch1Current">— A</span>
+                    </div>
+
+                    <div class="measurement">
+                        <span>Moc</span>
+                        <span id="ch1Power">— W</span>
+                    </div>
+
+                </div>
+
+
+                <div class="power-detail">
+
+                    <div class="power-detail-title">
+                        CH2 • GŁÓWNE 5V
+                    </div>
+
+                    <div class="measurement">
+                        <span>Napięcie</span>
+                        <span id="ch2Voltage">— V</span>
+                    </div>
+
+                    <div class="measurement">
+                        <span>Prąd</span>
+                        <span id="ch2Current">— A</span>
+                    </div>
+
+                    <div class="measurement">
+                        <span>Moc</span>
+                        <span id="ch2Power">— W</span>
+                    </div>
+
+                </div>
+
+
+                <div class="power-detail">
+
+                    <div class="power-detail-title">
+                        CH3 • CZUJNIKI + EEPROM
+                    </div>
+
+                    <div class="measurement">
+                        <span>Napięcie</span>
+                        <span id="ch3Voltage">— V</span>
+                    </div>
+
+                    <div class="measurement">
+                        <span>Prąd</span>
+                        <span id="ch3Current">— A</span>
+                    </div>
+
+                    <div class="measurement">
+                        <span>Moc</span>
+                        <span id="ch3Power">— W</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WORKSPACE
+    ====================================================== -->
+
+    <div class="workspace">
+
+        <!-- =================================================
+             LEFT
+        ================================================== -->
+
+        <div class="left-column">
+
+            <!-- NRF24 -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div class="section-title">
+
+                        <div class="section-icon">
+                            RF
+                        </div>
+
+                        NRF24
+                    </div>
+
+                    <span class="badge badge-neutral">
+                        RADIO
+                    </span>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="form-grid">
+
+                        <div class="field">
+
+                            <label for="nrfChannel">
+                                Kanał
+                            </label>
+
+                            <input
+                                id="nrfChannel"
+                                type="number"
+                                min="0"
+                                max="125"
+                            >
+
+                            <div class="field-help">
+                                0–125
+                            </div>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="nrfPower">
+                                Moc nadajnika
+                            </label>
+
+                            <select id="nrfPower">
+
+                                <option value="0">
+                                    MIN
+                                </option>
+
+                                <option value="1">
+                                    LOW
+                                </option>
+
+                                <option value="2">
+                                    HIGH
+                                </option>
+
+                                <option value="3">
+                                    MAX
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="nrfRate">
+                                Data Rate
+                            </label>
+
+                            <select id="nrfRate">
+
+                                <option value="0">
+                                    250 KBPS
+                                </option>
+
+                                <option value="1">
+                                    1 MBPS
+                                </option>
+
+                                <option value="2">
+                                    2 MBPS
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="sendInterval">
+                                Interwał wysyłania
+                            </label>
+
+                            <div class="input-unit">
+
+                                <input
+                                    id="sendInterval"
+                                    type="number"
+                                    min="100"
+                                    max="60000"
+                                >
+
+                                <span>ms</span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- NODE -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div class="section-title">
+
+                        <div class="section-icon">
+                            ID
+                        </div>
+
+                        Nadajnik
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="form-grid two">
+
+                        <div class="field">
+
+                            <label for="nodeId">
+                                Node ID
+                            </label>
+
+                            <input
+                                id="nodeId"
+                                type="text"
+                                maxlength="12"
+                                placeholder="WEATHER01"
+                            >
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="seaLevel">
+                                Ciśnienie na poziomie morza
+                            </label>
+
+                            <div class="input-unit">
+
+                                <input
+                                    id="seaLevel"
+                                    type="number"
+                                    min="80000"
+                                    max="120000"
+                                >
+
+                                <span>Pa</span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- SENSORS -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div class="section-title">
+
+                        <div class="section-icon">
+                            ◉
+                        </div>
+
+                        Czujniki
+                    </div>
+
+                    <span
+                        id="sensorCount"
+                        class="badge badge-neutral"
+                    >
+                        0 / 5
+                    </span>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="sensor-grid">
+
+                        <div class="sensor">
+
+                            <input
+                                id="sensorAHT20"
+                                type="checkbox"
+                            >
+
+                            <label for="sensorAHT20">
+
+                                <span class="sensor-name">
+                                    AHT20
+                                </span>
+
+                                <span class="sensor-type">
+                                    temperatura / RH
+                                </span>
+
+                                <span class="sensor-state">
+                                    WYŁĄCZONY
+                                </span>
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="sensor">
+
+                            <input
+                                id="sensorBMP280"
+                                type="checkbox"
+                            >
+
+                            <label for="sensorBMP280">
+
+                                <span class="sensor-name">
+                                    BMP280
+                                </span>
+
+                                <span class="sensor-type">
+                                    ciśnienie
+                                </span>
+
+                                <span class="sensor-state">
+                                    WYŁĄCZONY
+                                </span>
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="sensor">
+
+                            <input
+                                id="sensorDS18B20"
+                                type="checkbox"
+                            >
+
+                            <label for="sensorDS18B20">
+
+                                <span class="sensor-name">
+                                    DS18B20
+                                </span>
+
+                                <span class="sensor-type">
+                                    temperatura
+                                </span>
+
+                                <span class="sensor-state">
+                                    WYŁĄCZONY
+                                </span>
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="sensor">
+
+                            <input
+                                id="sensorTEMT6000"
+                                type="checkbox"
+                            >
+
+                            <label for="sensorTEMT6000">
+
+                                <span class="sensor-name">
+                                    TEMT6000
+                                </span>
+
+                                <span class="sensor-type">
+                                    światło
+                                </span>
+
+                                <span class="sensor-state">
+                                    WYŁĄCZONY
+                                </span>
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="sensor">
+
+                            <input
+                                id="sensorINA3221"
+                                type="checkbox"
+                            >
+
+                            <label for="sensorINA3221">
+
+                                <span class="sensor-name">
+                                    INA3221
+                                </span>
+
+                                <span class="sensor-type">
+                                    napięcie / prąd
+                                </span>
+
+                                <span class="sensor-state">
+                                    WYŁĄCZONY
+                                </span>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- CALIBRATION -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div class="section-title">
+
+                        <div class="section-icon">
+                            Δ
+                        </div>
+
+                        Kalibracja
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="form-grid">
+
+                        <div class="field">
+
+                            <label for="tempOffset">
+                                Temperatura
+                            </label>
+
+                            <div class="input-unit">
+
+                                <input
+                                    id="tempOffset"
+                                    type="number"
+                                    step="0.01"
+                                >
+
+                                <span>°C</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="humidityOffset">
+                                Wilgotność
+                            </label>
+
+                            <div class="input-unit">
+
+                                <input
+                                    id="humidityOffset"
+                                    type="number"
+                                    step="0.01"
+                                >
+
+                                <span>%</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="pressureOffset">
+                                Ciśnienie
+                            </label>
+
+                            <div class="input-unit">
+
+                                <input
+                                    id="pressureOffset"
+                                    type="number"
+                                    step="1"
+                                >
+
+                                <span>Pa</span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ACTIONS -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div class="section-title">
+
+                        <div class="section-icon">
+                            ⚙
+                        </div>
+
+                        Konfiguracja
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="actions">
+
+                        <button
+                            id="saveButton"
+                            class="btn btn-success"
+                            disabled
+                        >
+                            ZAPISZ DO 24C02
+                        </button>
+
+                        <button
+                            id="restartButton"
+                            class="btn btn-secondary"
+                            disabled
+                        >
+                            RESTART NADAJNIKA
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- =================================================
+             RIGHT — SERIAL
+        ================================================== -->
+
+        <div class="right-column">
+
+            <section class="card serial-card">
+
+                <div class="card-header serial-header">
+
+                    <div class="section-title">
+
+                        <div class="section-icon">
+                            &gt;_
+                        </div>
+
+                        Serial Monitor
+                    </div>
+
+
+                    <div class="serial-stats">
+
+                        <div class="serial-stat">
+                            TX:
+                            <strong id="txBytesTop">
+                                0 B
+                            </strong>
+                        </div>
+
+                        <div class="serial-stat">
+                            RX:
+                            <strong id="rxBytesTop">
+                                0 B
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="log"
+                    class="log"
+                ></div>
+
+
+                <div class="serial-footer">
+
+                    <div class="serial-counters">
+
+                        <div class="counter">
+
+                            <span class="counter-label">
+                                TX
+                            </span>
+
+                            <span
+                                id="txBytes"
+                                class="counter-value"
+                            >
+                                0 B
+                            </span>
+
+                        </div>
+
+
+                        <div class="counter">
+
+                            <span class="counter-label">
+                                RX
+                            </span>
+
+                            <span
+                                id="rxBytes"
+                                class="counter-value"
+                            >
+                                0 B
+                            </span>
+
+                        </div>
+
+
+                        <div class="counter">
+
+                            <span class="counter-label">
+                                FRAMES
+                            </span>
+
+                            <span
+                                id="frameCount"
+                                class="counter-value"
+                            >
+                                0 / 0
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        id="clearLogButton"
+                        class="btn btn-secondary"
+                    >
+                        WYCZYŚĆ
+                    </button>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<script>
+
+/* =========================================================
+   SERIAL STATE
+========================================================= */
+
+let port = null;
+let reader = null;
+
+let inputBuffer = "";
+
+let connected = false;
+let disconnecting = false;
+
+let currentBaudRate = null;
+
+let txBytes = 0;
+let rxBytes = 0;
+
+let txFrames = 0;
+let rxFrames = 0;
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const connection =
+    document.getElementById("connection");
+
+const statusText =
+    document.getElementById("statusText");
+
+const baudDisplay =
+    document.getElementById("baudDisplay");
+
+const connectButton =
+    document.getElementById("connectButton");
+
+const disconnectButton =
+    document.getElementById("disconnectButton");
+
+const readButton =
+    document.getElementById("readButton");
+
+const saveButton =
+    document.getElementById("saveButton");
+
+const restartButton =
+    document.getElementById("restartButton");
+
+const logElement =
+    document.getElementById("log");
+
+
+/* =========================================================
+   BAUD RATES
+========================================================= */
+
+const BAUD_RATES = [
+    115200,
+    57600,
+    38400,
+    19200,
+    9600
+];
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function setStatus(text, type = "disconnected") {
+
+    statusText.textContent = text;
+
+    connection.classList.remove(
+        "connected",
+        "warning"
+    );
+
+    if (type === "connected") {
+        connection.classList.add("connected");
+    }
+
+    if (type === "warning") {
+        connection.classList.add("warning");
+    }
+}
+
+
+/* =========================================================
+   FORMAT BYTES
+========================================================= */
+
+function formatBytes(bytes) {
+
+    if (bytes < 1024) {
+        return `${bytes} B`;
+    }
+
+    if (bytes < 1024 * 1024) {
+        return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+}
+
+
+/* =========================================================
+   SERIAL LOG
+========================================================= */
+
+function getLogType(message) {
+
+    if (message.startsWith("TX:")) {
+        return "tx";
+    }
+
+    if (message.startsWith("RX:")) {
+        return "rx";
+    }
+
+    if (
+        message.startsWith("BŁĄD") ||
+        message.startsWith("ERROR") ||
+        message.startsWith("Reader error")
+    ) {
+        return "error";
+    }
+
+    if (
+        message.startsWith("UWAGA") ||
+        message.startsWith("WARNING")
+    ) {
+        return "warning";
+    }
+
+    return "info";
+}
+
+
+function log(message, type = null) {
+
+    if (!type) {
+        type = getLogType(message);
+    }
+
+    const line =
+        document.createElement("div");
+
+    line.className =
+        `log-line ${type}`;
+
+    const now = new Date();
+
+    const time =
+        now.toLocaleTimeString(
+            "pl-PL",
+            {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }
+        );
+
+    const timeElement =
+        document.createElement("span");
+
+    timeElement.className = "log-time";
+    timeElement.textContent = time;
+
+    const typeElement =
+        document.createElement("span");
+
+    typeElement.className = "log-type";
+
+    if (type === "tx") {
+        typeElement.textContent = "TX";
+    }
+    else if (type === "rx") {
+        typeElement.textContent = "RX";
+    }
+    else if (type === "error") {
+        typeElement.textContent = "ERR";
+    }
+    else if (type === "warning") {
+        typeElement.textContent = "WARN";
+    }
+    else {
+        typeElement.textContent = "INFO";
+    }
+
+    const messageElement =
+        document.createElement("span");
+
+    messageElement.className = "log-message";
+    messageElement.textContent = message;
+
+    line.appendChild(timeElement);
+    line.appendChild(typeElement);
+    line.appendChild(messageElement);
+
+    logElement.appendChild(line);
+
+    logElement.scrollTop =
+        logElement.scrollHeight;
+}
+
+
+/* =========================================================
+   SERIAL COUNTERS
+========================================================= */
+
+function updateSerialCounters() {
+
+    const tx =
+        formatBytes(txBytes);
+
+    const rx =
+        formatBytes(rxBytes);
+
+    document.getElementById("txBytes").textContent = tx;
+    document.getElementById("rxBytes").textContent = rx;
+
+    document.getElementById("txBytesTop").textContent = tx;
+    document.getElementById("rxBytesTop").textContent = rx;
+
+    document.getElementById("frameCount").textContent =
+        `${txFrames} / ${rxFrames}`;
+}
+
+
+/* =========================================================
+   SENSOR COUNT
+========================================================= */
+
+function updateSensorCount() {
+
+    const sensors = [
+        "sensorAHT20",
+        "sensorBMP280",
+        "sensorDS18B20",
+        "sensorTEMT6000",
+        "sensorINA3221"
+    ];
+
+    let count = 0;
+
+    sensors.forEach(id => {
+
+        const checkbox =
+            document.getElementById(id);
+
+        const state =
+            checkbox.parentElement
+                .querySelector(".sensor-state");
+
+        if (checkbox.checked) {
+
+            count++;
+
+            state.textContent =
+                "AKTYWNY";
+
+        }
+        else {
+
+            state.textContent =
+                "WYŁĄCZONY";
+        }
+    });
+
+    document.getElementById("sensorCount")
+        .textContent = `${count} / 5`;
+
+    document.getElementById("deviceSensors")
+        .textContent = `${count} / 5`;
+}
+
+
+/* =========================================================
+   CONNECT
+========================================================= */
+
+connectButton.addEventListener(
+    "click",
+    async () => {
+
+        if (!("serial" in navigator)) {
+
+            setStatus(
+                "WEB SERIAL NIEDOSTĘPNY",
+                "warning"
+            );
+
+            log(
+                "BŁĄD: Przeglądarka nie obsługuje Web Serial.",
+                "error"
+            );
+
+            return;
+        }
+
+        try {
+
+            port =
+                await navigator.serial.requestPort();
+
+            await openSerialWithAutoDetect();
+
+        }
+        catch (error) {
+
+            log(
+                `BŁĄD: ${error.message}`,
+                "error"
+            );
+
+            setStatus(
+                "BŁĄD POŁĄCZENIA",
+                "warning"
+            );
+        }
+    }
+);
+
+
+/* =========================================================
+   OPEN SERIAL / AUTO BAUD DETECTION
+========================================================= */
+
+async function openSerialWithAutoDetect() {
+
+    /*
+       Web Serial nie posiada natywnego mechanizmu
+       "odczytaj aktualny baud rate".
+
+       Dlatego sprawdzamy popularne prędkości.
+       Arduino odpowiada na CONFIG / CONFIG_READY,
+       dzięki czemu można rozpoznać właściwą prędkość.
+    */
+
+    log(
+        "INFO: Rozpoczynam wykrywanie bitrate Serial...",
+        "info"
+    );
+
+    for (const baud of BAUD_RATES) {
+
+        if (!port) {
+            return;
+        }
+
+        try {
+
+            if (port.readable || port.writable) {
+
+                try {
+                    await port.close();
+                }
+                catch (_) {}
+
+            }
+
+            await port.open({
+                baudRate: baud
+            });
+
+            currentBaudRate = baud;
+
+            baudDisplay.textContent =
+                `${baud} baud`;
+
+            setStatus(
+                `TEST ${baud} BAUD`,
+                "warning"
+            );
+
+            log(
+                `INFO: Testuję ${baud} baud.`,
+                "info"
+            );
+
+            connected = true;
+            disconnecting = false;
+
+            connectButton.disabled = true;
+            disconnectButton.disabled = false;
+            readButton.disabled = false;
+            saveButton.disabled = false;
+            restartButton.disabled = false;
+
+            startReader();
+
+            await delay(150);
+
+            inputBuffer = "";
+
+            await sendLine(
+                "CONFIG",
+                true
+            );
+
+            /*
+               Dajemy Arduino chwilę na odpowiedź.
+               Jeżeli odpowiedź będzie poprawna,
+               processLine ustawi właściwe połączenie.
+            */
+
+            await delay(500);
+
+            if (connected) {
+
+                setStatus(
+                    `POŁĄCZONO • ${baud} BAUD`,
+                    "connected"
+                );
+
+                log(
+                    `INFO: Wykryto bitrate ${baud} baud.`,
+                    "info"
+                );
+
+                return;
+            }
+
+        }
+        catch (error) {
+
+            log(
+                `INFO: ${baud} baud niedostępne.`,
+                "info"
+            );
+        }
+    }
+
+    throw new Error(
+        "Nie udało się wykryć bitrate Serial."
+    );
+}
+
+
+/* =========================================================
+   READER
+========================================================= */
+
+async function startReader() {
+
+    if (!port || !port.readable) {
+        return;
+    }
+
+    try {
+
+        reader =
+            port.readable.getReader();
+
+        while (connected) {
+
+            const {
+                value,
+                done
+            } = await reader.read();
+
+            if (done) {
+                break;
+            }
+
+            if (!value) {
+                continue;
+            }
+
+            rxBytes += value.byteLength;
+
+            updateSerialCounters();
+
+            const decoder =
+                new TextDecoder();
+
+            const text =
+                decoder.decode(value);
+
+            processIncoming(text);
+        }
+
+    }
+    catch (error) {
+
+        if (!disconnecting) {
+
+            log(
+                `Reader error: ${error.message}`,
+                "error"
+            );
+
+            setStatus(
+                "BŁĄD SERIAL",
+                "warning"
+            );
+        }
+
+    }
+    finally {
+
+        try {
+
+            if (reader) {
+                reader.releaseLock();
+            }
+
+        }
+        catch (_) {}
+
+        reader = null;
+    }
+}
+
+
+/* =========================================================
+   INCOMING BUFFER
+========================================================= */
+
+function processIncoming(text) {
+
+    inputBuffer += text;
+
+    const lines =
+        inputBuffer.split(/\r?\n/);
+
+    inputBuffer =
+        lines.pop() || "";
+
+    for (const line of lines) {
+
+        const clean =
+            line.trim();
+
+        if (clean.length === 0) {
+            continue;
+        }
+
+        rxFrames++;
+
+        updateSerialCounters();
+
+        processLine(clean);
+    }
+}
+
+
+/* =========================================================
+   PROCESS LINE
+========================================================= */
+
+function processLine(line) {
+
+    log(
+        `RX: ${line}`,
+        "rx"
+    );
+
+    /*
+       CONFIGURATION
+    */
+
+    if (line.startsWith("CFG|")) {
+
+        parseConfig(line);
+
+        /*
+           Odpowiedź CFG oznacza, że aktualny
+           bitrate działa.
+        */
+
+        setStatus(
+            `POŁĄCZONO • ${currentBaudRate} BAUD`,
+            "connected"
+        );
+
+        return;
+    }
+
+
+    if (line === "CONFIG_READY") {
+
+        setStatus(
+            `POŁĄCZONO • ${currentBaudRate} BAUD`,
+            "connected"
+        );
+
+        return;
+    }
+
+
+    /*
+       POWER / INA3221
+
+       POWER|Vbat|Ibat|Vmain|Imain|Vsens|Isens
+    */
+
+    /* =========================================================
+   INA3221
+========================================================= */
+
+if (
+    processINA3221Line(line)
+) {
+    return;
+}
+
+
+    if (line === "SET_OK") {
+
+        setStatus(
+            "KONFIGURACJA ZMIENIONA",
+            "connected"
+        );
+
+        return;
+    }
+
+
+    if (line === "SAVE_OK") {
+
+        setStatus(
+            "ZAPISANO DO 24C02",
+            "connected"
+        );
+
+        return;
+    }
+
+
+    if (line === "SAVE_ERROR") {
+
+        setStatus(
+            "BŁĄD ZAPISU 24C02",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    if (line === "RESTARTING") {
+
+        setStatus(
+            "RESTART NADAJNIKA...",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    if (line.startsWith("ERROR|")) {
+
+        setStatus(
+            "BŁĄD URZĄDZENIA",
+            "warning"
+        );
+
+        return;
+    }
+}
+
+
+/* =========================================================
+   CONFIG PARSER
+========================================================= */
+
+function parseConfig(line) {
+
+    const p =
+        line.split("|");
+
+    if (p.length < 11) {
+
+        log(
+            "BŁĄD: Nieprawidłowa ramka CFG.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    /*
+       CFG format:
+
+       CFG|
+       nodeId|
+       nrfChannel|
+       nrfPower|
+       nrfRate|
+       sendInterval|
+       sensors|
+       seaLevel|
+       tempOffset|
+       humidityOffset|
+       pressureOffset
+    */
+
+
+    document.getElementById("nodeId").value =
+        p[1];
+
+    document.getElementById("nrfChannel").value =
+        p[2];
+
+    document.getElementById("nrfPower").value =
+        p[3];
+
+    document.getElementById("nrfRate").value =
+        p[4];
+
+    document.getElementById("sendInterval").value =
+        p[5];
+
+    document.getElementById("seaLevel").value =
+        p[7];
+
+
+    document.getElementById("tempOffset").value =
+        (Number(p[8]) / 100).toFixed(2);
+
+    document.getElementById("humidityOffset").value =
+        (Number(p[9]) / 100).toFixed(2);
+
+    document.getElementById("pressureOffset").value =
+        p[10];
+
+
+    const flags =
+        Number(p[6]);
+
+
+    document.getElementById("sensorAHT20").checked =
+        !!(flags & 0x01);
+
+    document.getElementById("sensorBMP280").checked =
+        !!(flags & 0x02);
+
+    document.getElementById("sensorDS18B20").checked =
+        !!(flags & 0x04);
+
+    document.getElementById("sensorTEMT6000").checked =
+        !!(flags & 0x08);
+
+    document.getElementById("sensorINA3221").checked =
+        !!(flags & 0x10);
+
+
+    updateSensorCount();
+    updateDeviceInfo();
+
+    log(
+        "INFO: Konfiguracja urządzenia została odczytana.",
+        "info"
+    );
+}
+
+
+/* =========================================================
+   DEVICE INFO
+========================================================= */
+
+function updateDeviceInfo() {
+
+    const nodeId =
+        document.getElementById("nodeId").value ||
+        "—";
+
+    const channel =
+        document.getElementById("nrfChannel").value;
+
+    const power =
+        document.getElementById("nrfPower");
+
+    const rate =
+        document.getElementById("nrfRate");
+
+    const interval =
+        document.getElementById("sendInterval").value;
+
+
+    const powerText =
+        power.options[power.selectedIndex]
+            ?.text || "—";
+
+    const rateText =
+        rate.options[rate.selectedIndex]
+            ?.text || "—";
+
+
+    document.getElementById(
+        "deviceNodeId"
+    ).textContent = nodeId;
+
+
+    document.getElementById(
+        "deviceNrf"
+    ).textContent =
+        channel !== ""
+            ? `CH ${channel}`
+            : "—";
+
+
+    document.getElementById(
+        "deviceNrfDetails"
+    ).textContent =
+        `${powerText} • ${rateText}`;
+
+
+    document.getElementById(
+        "deviceInterval"
+    ).textContent =
+        interval
+            ? `${interval} ms`
+            : "—";
+}
+
+
+/* =========================================================
+   POWER PARSER
+========================================================= */
+
+/* =========================================================
+   INA3221 PARSER
+
+   Arduino wysyła:
+
+   [INA3221]
+
+   CH1: 3.84 V / -0.06 A
+   CH2: 4.92 V / -0.04 A
+   CH3: 4.92 V / -0.01 A
+========================================================= */
+
+let inaChannels = {
+    1: {
+        voltage: null,
+        current: null,
+        power: null
+    },
+
+    2: {
+        voltage: null,
+        current: null,
+        power: null
+    },
+
+    3: {
+        voltage: null,
+        current: null,
+        power: null
+    }
+};
+
+
+/*
+   Zapamiętujemy ostatni kanałowy odczyt.
+   Dzięki temu jeżeli Arduino wysyła kanały
+   pojedynczo, interfejs nadal ma komplet danych.
+*/
+
+function parseINA3221Line(line) {
+
+    /*
+       Przykład:
+
+       CH1: 3.84 V / -0.06 A
+    */
+
+    const match =
+        line.match(
+            /^CH([123]):\s*([-+]?\d+(?:\.\d+)?)\s*V\s*\/\s*([-+]?\d+(?:\.\d+)?)\s*A/i
+        );
+
+    if (!match) {
+        return false;
+    }
+
+
+    const channel =
+        Number(match[1]);
+
+    const voltage =
+        Number(match[2]);
+
+    const current =
+        Number(match[3]);
+
+
+    if (
+        !Number.isFinite(voltage) ||
+        !Number.isFinite(current)
+    ) {
+        return false;
+    }
+
+
+    /*
+       Moc fizyczna:
+
+       P = U × I
+
+       Do prezentacji poboru mocy używamy
+       wartości bezwzględnej, ponieważ INA3221
+       może zwracać ujemny kierunek prądu.
+    */
+
+    const signedPower =
+        voltage * current;
+
+    const power =
+        Math.abs(signedPower);
+
+
+    inaChannels[channel] = {
+        voltage,
+        current,
+        power
+    };
+
+
+    updatePowerDisplay();
+
+    return true;
+}
+
+
+/* =========================================================
+   INA3221 HEADER
+========================================================= */
+
+let ina3221Active = false;
+
+
+function processINA3221Line(line) {
+
+    const clean =
+        line.trim();
+
+
+    /*
+       Arduino:
+
+       [INA3221]
+    */
+
+    if (
+        clean === "[INA3221]"
+    ) {
+
+        ina3221Active = true;
+
+        log(
+            "INFO: Rozpoczęto odczyt INA3221.",
+            "info"
+        );
+
+        return true;
+    }
+
+
+    /*
+       CH1 / CH2 / CH3
+    */
+
+    if (ina3221Active) {
+
+        if (
+            parseINA3221Line(clean)
+        ) {
+
+            return true;
+        }
+    }
+
+
+    /*
+       Jeżeli pojawi się coś innego,
+       kończymy aktualny blok INA3221.
+    */
+
+    if (
+        ina3221Active &&
+        !clean.startsWith("CH1:") &&
+        !clean.startsWith("CH2:") &&
+        !clean.startsWith("CH3:")
+    ) {
+
+        ina3221Active = false;
+    }
+
+
+    return false;
+}
+
+
+/* =========================================================
+   POWER DISPLAY
+========================================================= */
+
+function updatePowerDisplay() {
+
+    const ch1 =
+        inaChannels[1];
+
+    const ch2 =
+        inaChannels[2];
+
+    const ch3 =
+        inaChannels[3];
+
+
+    /*
+       CH1
+    */
+
+    if (ch1.voltage !== null) {
+
+        document.getElementById(
+            "ch1Voltage"
+        ).textContent =
+            `${ch1.voltage.toFixed(2)} V`;
+
+        document.getElementById(
+            "ch1Current"
+        ).textContent =
+            `${ch1.current.toFixed(3)} A`;
+
+        document.getElementById(
+            "ch1Power"
+        ).textContent =
+            `${ch1.power.toFixed(3)} W`;
+
+        document.getElementById(
+            "powerSummary1"
+        ).textContent =
+            `${ch1.voltage.toFixed(2)} V • ` +
+            `${ch1.current.toFixed(3)} A • ` +
+            `${ch1.power.toFixed(2)} W`;
+    }
+
+
+    /*
+       CH2
+    */
+
+    if (ch2.voltage !== null) {
+
+        document.getElementById(
+            "ch2Voltage"
+        ).textContent =
+            `${ch2.voltage.toFixed(2)} V`;
+
+        document.getElementById(
+            "ch2Current"
+        ).textContent =
+            `${ch2.current.toFixed(3)} A`;
+
+        document.getElementById(
+            "ch2Power"
+        ).textContent =
+            `${ch2.power.toFixed(3)} W`;
+
+        document.getElementById(
+            "powerSummary2"
+        ).textContent =
+            `${ch2.voltage.toFixed(2)} V • ` +
+            `${ch2.current.toFixed(3)} A • ` +
+            `${ch2.power.toFixed(2)} W`;
+    }
+
+
+    /*
+       CH3
+    */
+
+    if (ch3.voltage !== null) {
+
+        document.getElementById(
+            "ch3Voltage"
+        ).textContent =
+            `${ch3.voltage.toFixed(2)} V`;
+
+        document.getElementById(
+            "ch3Current"
+        ).textContent =
+            `${ch3.current.toFixed(3)} A`;
+
+        document.getElementById(
+            "ch3Power"
+        ).textContent =
+            `${ch3.power.toFixed(3)} W`;
+
+        document.getElementById(
+            "powerSummary3"
+        ).textContent =
+            `${ch3.voltage.toFixed(2)} V • ` +
+            `${ch3.current.toFixed(3)} A • ` +
+            `${ch3.power.toFixed(2)} W`;
+    }
+
+
+    /*
+       SUMA
+
+       Pobór wszystkich trzech kanałów.
+    */
+
+    const totalPower =
+        (ch1.power || 0) +
+        (ch2.power || 0) +
+        (ch3.power || 0);
+
+
+    document.getElementById(
+        "totalPower"
+    ).textContent =
+        `${totalPower.toFixed(2)} W`;
+}
+
+/* =========================================================
+   GET SENSOR FLAGS
+========================================================= */
+
+function getSensorFlags() {
+
+    let flags = 0;
+
+    if (
+        document.getElementById(
+            "sensorAHT20"
+        ).checked
+    ) {
+        flags |= 0x01;
+    }
+
+    if (
+        document.getElementById(
+            "sensorBMP280"
+        ).checked
+    ) {
+        flags |= 0x02;
+    }
+
+    if (
+        document.getElementById(
+            "sensorDS18B20"
+        ).checked
+    ) {
+        flags |= 0x04;
+    }
+
+    if (
+        document.getElementById(
+            "sensorTEMT6000"
+        ).checked
+    ) {
+        flags |= 0x08;
+    }
+
+    if (
+        document.getElementById(
+            "sensorINA3221"
+        ).checked
+    ) {
+        flags |= 0x10;
+    }
+
+    return flags;
+}
+
+
+/* =========================================================
+   SEND LINE
+========================================================= */
+
+async function sendLine(
+    line,
+    internal = false
+) {
+
+    if (
+        !port ||
+        !port.writable
+    ) {
+
+        if (!internal) {
+
+            log(
+                "BŁĄD: Port Serial nie jest dostępny.",
+                "error"
+            );
+        }
+
+        return false;
+    }
+
+
+    const data =
+        new TextEncoder().encode(
+            line + "\n"
+        );
+
+
+    try {
+
+        const writer =
+            port.writable.getWriter();
+
+        await writer.write(data);
+
+        writer.releaseLock();
+
+
+        txBytes += data.byteLength;
+        txFrames++;
+
+        updateSerialCounters();
+
+
+        if (!internal) {
+
+            log(
+                `TX: ${line}`,
+                "tx"
+            );
+        }
+
+        return true;
+
+    }
+    catch (error) {
+
+        log(
+            `BŁĄD TX: ${error.message}`,
+            "error"
+        );
+
+        return false;
+    }
+}
+
+
+/* =========================================================
+   READ CONFIG
+========================================================= */
+
+readButton.addEventListener(
+    "click",
+    async () => {
+
+        await sendLine("GET");
+
+        setStatus(
+            "ODCZYTYWANIE...",
+            "warning"
+        );
+    }
+);
+
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+saveButton.addEventListener(
+    "click",
+    async () => {
+
+        const nodeId =
+            document.getElementById(
+                "nodeId"
+            ).value.trim();
+
+
+        const channel =
+            Number(
+                document.getElementById(
+                    "nrfChannel"
+                ).value
+            );
+
+
+        const power =
+            Number(
+                document.getElementById(
+                    "nrfPower"
+                ).value
+            );
+
+
+        const rate =
+            Number(
+                document.getElementById(
+                    "nrfRate"
+                ).value
+            );
+
+
+        const interval =
+            Number(
+                document.getElementById(
+                    "sendInterval"
+                ).value
+            );
+
+
+        const seaLevel =
+            Number(
+                document.getElementById(
+                    "seaLevel"
+                ).value
+            );
+
+
+        const tempOffset =
+            Math.round(
+                Number(
+                    document.getElementById(
+                        "tempOffset"
+                    ).value
+                ) * 100
+            );
+
+
+        const humidityOffset =
+            Math.round(
+                Number(
+                    document.getElementById(
+                        "humidityOffset"
+                    ).value
+                ) * 100
+            );
+
+
+        const pressureOffset =
+            Math.round(
+                Number(
+                    document.getElementById(
+                        "pressureOffset"
+                    ).value
+                )
+            );
+
+
+        if (
+            !nodeId ||
+            nodeId.length > 12
+        ) {
+
+            alert(
+                "Podaj poprawny Node ID."
+            );
+
+            return;
+        }
+
+
+        if (
+            channel < 0 ||
+            channel > 125
+        ) {
+
+            alert(
+                "Kanał NRF24 musi być w zakresie 0–125."
+            );
+
+            return;
+        }
+
+
+        if (
+            interval < 100 ||
+            interval > 60000
+        ) {
+
+            alert(
+                "Interwał musi być w zakresie 100–60000 ms."
+            );
+
+            return;
+        }
+
+
+        if (
+            seaLevel < 80000 ||
+            seaLevel > 120000
+        ) {
+
+            alert(
+                "Ciśnienie musi być w zakresie 80000–120000 Pa."
+            );
+
+            return;
+        }
+
+
+        const sensors =
+            getSensorFlags();
+
+
+        const command =
+            [
+                "SET",
+                nodeId,
+                channel,
+                power,
+                rate,
+                interval,
+                sensors,
+                seaLevel,
+                tempOffset,
+                humidityOffset,
+                pressureOffset
+            ].join("|");
+
+
+        const sent =
+            await sendLine(command);
+
+
+        if (!sent) {
+            return;
+        }
+
+
+        setStatus(
+            "ZAPISYWANIE...",
+            "warning"
+        );
+
+
+        await delay(100);
+
+        await sendLine("SAVE");
+    }
+);
+
+
+/* =========================================================
+   RESTART
+========================================================= */
+
+restartButton.addEventListener(
+    "click",
+    async () => {
+
+        const confirmRestart =
+            confirm(
+                "Czy na pewno zrestartować nadajnik?"
+            );
+
+        if (!confirmRestart) {
+            return;
+        }
+
+        await sendLine("RESTART");
+
+        setStatus(
+            "RESTART NADAJNIKA...",
+            "warning"
+        );
+    }
+);
+
+
+/* =========================================================
+   DISCONNECT
+========================================================= */
+
+disconnectButton.addEventListener(
+    "click",
+    async () => {
+
+        await disconnectSerial();
+    }
+);
+
+
+async function disconnectSerial() {
+
+    if (disconnecting) {
+        return;
+    }
+
+    disconnecting = true;
+    connected = false;
+
+
+    try {
+
+        if (reader) {
+
+            try {
+                await reader.cancel();
+            }
+            catch (_) {}
+
+        }
+
+    }
+    catch (_) {}
+
+
+    try {
+
+        if (port) {
+
+            try {
+                await port.close();
+            }
+            catch (_) {}
+
+        }
+
+    }
+    catch (_) {}
+
+
+    reader = null;
+    port = null;
+
+    currentBaudRate = null;
+
+    baudDisplay.textContent = "—";
+
+
+    connectButton.disabled = false;
+    disconnectButton.disabled = true;
+
+    readButton.disabled = true;
+    saveButton.disabled = true;
+    restartButton.disabled = true;
+
+
+    setStatus(
+        "NIEPOŁĄCZONO",
+        "disconnected"
+    );
+
+
+    log(
+        "INFO: Port USB rozłączony.",
+        "info"
+    );
+
+
+    disconnecting = false;
+}
+
+
+/* =========================================================
+   CLEAR LOG
+========================================================= */
+
+document.getElementById(
+    "clearLogButton"
+).addEventListener(
+    "click",
+    () => {
+
+        logElement.innerHTML = "";
+
+        txBytes = 0;
+        rxBytes = 0;
+
+        txFrames = 0;
+        rxFrames = 0;
+
+        updateSerialCounters();
+    }
+);
+
+
+/* =========================================================
+   SENSOR EVENTS
+========================================================= */
+
+[
+    "sensorAHT20",
+    "sensorBMP280",
+    "sensorDS18B20",
+    "sensorTEMT6000",
+    "sensorINA3221"
+].forEach(id => {
+
+    document.getElementById(id)
+        .addEventListener(
+            "change",
+            () => {
+
+                updateSensorCount();
+            }
+        );
+});
+
+
+/* =========================================================
+   DEVICE INFO EVENTS
+========================================================= */
+
+[
+    "nodeId",
+    "nrfChannel",
+    "nrfPower",
+    "nrfRate",
+    "sendInterval"
+].forEach(id => {
+
+    document.getElementById(id)
+        .addEventListener(
+            "input",
+            updateDeviceInfo
+        );
+
+    document.getElementById(id)
+        .addEventListener(
+            "change",
+            updateDeviceInfo
+        );
+});
+
+
+/* =========================================================
+   USB DISCONNECT EVENT
+========================================================= */
+
+if ("serial" in navigator) {
+
+    navigator.serial.addEventListener(
+        "disconnect",
+        async event => {
+
+            if (
+                port &&
+                event.port === port
+            ) {
+
+                log(
+                    "BŁĄD: Urządzenie USB zostało odłączone.",
+                    "error"
+                );
+
+                await disconnectSerial();
+            }
+        }
+    );
+}
+
+
+/* =========================================================
+   BEFORE UNLOAD
+========================================================= */
+
+window.addEventListener(
+    "beforeunload",
+    async () => {
+
+        try {
+
+            if (reader) {
+                await reader.cancel();
+            }
+
+        }
+        catch (_) {}
+
+
+        try {
+
+            if (port) {
+                await port.close();
+            }
+
+        }
+        catch (_) {}
+    }
+);
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function delay(ms) {
+
+    return new Promise(
+        resolve => setTimeout(
+            resolve,
+            ms
+        )
+    );
+}
+
+
+/* =========================================================
+   INITIAL STATE
+========================================================= */
+
+updateSensorCount();
+updateDeviceInfo();
+updateSerialCounters();
+
+log(
+    "INFO: Konfigurator gotowy. Podłącz Arduino Nano przez USB.",
+    "info"
+);
+
+</script>
+
+</body>
+</html>
